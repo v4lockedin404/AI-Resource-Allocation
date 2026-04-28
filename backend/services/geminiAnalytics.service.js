@@ -11,13 +11,19 @@ async function generatePredictions() {
   // Fetch recent reports from Supabase
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const { data: reports, error } = await supabase
+  let { data: reports, error } = await supabase
     .from('field_reports')
     .select('location_name, urgency_level, required_skills, issue_description, status, created_at')
     .gte('created_at', thirtyDaysAgo)
     .order('created_at', { ascending: false });
 
-  if (error) throw new Error(`Failed to fetch reports for analytics: ${error.message}`);
+  if (error) {
+    if (error.code === '42P01' || error.message?.includes('Could not find the table')) {
+      reports = [];
+    } else {
+      throw new Error(`Failed to fetch reports for analytics: ${error.message}`);
+    }
+  }
 
   if (!reports || reports.length === 0) {
     return [{
