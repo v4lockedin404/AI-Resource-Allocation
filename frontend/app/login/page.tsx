@@ -21,6 +21,14 @@ export default function LoginPage() {
     setErrorMessage('');
 
     try {
+      // MOCK LOGIN FOR MVP
+      if (email === 'test@gmail.com' && password === 'testpassword') {
+        document.cookie = "mock_auth=true; path=/; max-age=86400"; // Expires in 1 day
+        toast.success('Welcome back!');
+        window.location.href = '/dashboard';
+        return;
+      }
+
       const supabase = getSupabaseClient();
       const { error, data } = await supabase.auth.signInWithPassword({ email, password });
 

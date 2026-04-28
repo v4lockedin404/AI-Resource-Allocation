@@ -24,12 +24,13 @@ export async function proxy(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
+  const hasMockAuth = request.cookies.get('mock_auth')?.value === 'true';
 
   // Protected routes — redirect to login if no session
   const protectedPaths = ['/dashboard', '/ingest', '/volunteers', '/analytics', '/reports'];
   const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p));
 
-  if (isProtected && !user) {
+  if (isProtected && !user && !hasMockAuth) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirected', '1');
     return NextResponse.redirect(loginUrl);

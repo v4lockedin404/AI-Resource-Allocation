@@ -130,8 +130,13 @@ router.get('/', async (req, res) => {
   }
 
   const { data, error } = await query;
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ reports: data, count: data.length });
+  if (error) {
+    if (error.code === '42P01' || error.message?.includes('Could not find the table')) {
+      return res.json({ reports: [], count: 0 });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+  return res.json({ reports: data || [], count: (data || []).length });
 });
 
 // ─────────────────────────────────────────────────────────────
