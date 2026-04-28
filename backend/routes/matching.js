@@ -24,21 +24,23 @@ router.post('/:reportId', async (req, res) => {
     return res.status(404).json({ error: 'Report not found.' });
   }
 
-  // Extract lat/lng from PostGIS geography column
-  // Supabase returns geography as WKB hex — we need to decode or use an alternate approach.
-  // Strategy: Use Supabase RPC or ST_AsText to get coords if not stored separately.
-  // For MVP: Store lat/lng separately or use ST_X/ST_Y via a custom RPC.
-  // Here we attempt to parse from the raw WKB or use coords from ai_extracted if available.
-
-  // Attempt to get coords via Supabase RPC
-  const { data: coords, error: coordError } = await supabase
-    .rpc('get_report_coords', { report_id: reportId });
-
+  // Extract lat/lng from PostGIS geography column (EWKB Hex string)
   let reportWithCoords = { ...report };
 
-  if (!coordError && coords && coords.length > 0) {
-    reportWithCoords.lat = coords[0].lat;
-    reportWithCoords.lng = coords[0].lng;
+  if (report.location) {
+    try {
+      const buf = Buffer.from(report.location, 'hex');
+      // EWKB Point Structure: 
+      // Byte 0: Endianness (01 for Little Endian)
+      // Bytes 1-4: Geometry Type (Point is 01000020 with SRID flag)
+      // Bytes 5-8: SRID (E6100000 for 4326)
+      // Bytes 9-16: Longitude (Double)
+      // Bytes 17-24: Latitude (Double)
+      reportWithCoords.lng = buf.readDoubleLE(9);
+      reportWithCoords.lat = buf.readDoubleLE(17);
+    } catch (err) {
+      console.error('Failed to parse EWKB location:', err);
+    }
   }
 
   // If report has no coordinates, matching cannot use proximity (will use fallback)

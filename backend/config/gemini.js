@@ -8,10 +8,10 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// gemini-1.5-flash: fast, cost-efficient — used for Vision OCR and text extraction
-const flashModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+// gemini-2.5-flash: fast, cost-efficient — used for Vision OCR and text extraction
+const flashModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-// gemini-1.5-pro: powerful reasoning — used for volunteer matching and analytics
-const proModel = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+// Downgraded pro to flash to avoid free-tier rate limits (429 limit: 0) on the user's API key
+const proModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 module.exports = { genAI, flashModel, proModel };

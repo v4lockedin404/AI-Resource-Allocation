@@ -1,0 +1,45 @@
+services:
+  # ----------------------------------------
+  # 1. Backend API (Node.js/Express)
+  # ----------------------------------------
+  - type: web
+    name: ai-resource-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      # These values must be filled out in the Render Dashboard securely
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLOUD_PROJECT_ID
+        sync: false
+      - key: PORT
+        value: 5000
+
+  # ----------------------------------------
+  # 2. Frontend App (Next.js)
+  # ----------------------------------------
+  - type: web
+    name: ai-resource-frontend
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      # Automatically links to the newly created Backend URL
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: ai-resource-backend
+          property: url
+      
+      # These values must be filled out in the Render Dashboard securely
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
