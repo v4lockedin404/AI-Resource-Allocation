@@ -31,12 +31,9 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
-      # Automatically links to the newly created Backend URL
+      # This must be the live Render URL of your backend (e.g. https://ai-resource-backend.onrender.com)
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: ai-resource-backend
-          property: url
+        sync: false
       
       # These values must be filled out in the Render Dashboard securely
       - key: NEXT_PUBLIC_SUPABASE_URL
