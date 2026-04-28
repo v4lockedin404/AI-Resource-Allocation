@@ -12,20 +12,27 @@ export default function AnalyticsPage() {
   const [error, setError] = useState('');
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
 
+  const [retryCount, setRetryCount] = useState(0);
+
   useEffect(() => {
     async function fetchPredictions() {
+      setLoading(true);
+      setError('');
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/analytics/predict`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/analytics/predict`, {
+          timeout: 30000, // 30s client-side timeout
+        });
         setPredictions(res.data.predictions);
         setGeneratedAt(res.data.generated_at);
       } catch (err: any) {
-        setError(err.message || 'Failed to load predictive analytics');
+        const msg = err?.response?.data?.error || err.message || 'Failed to load predictive analytics';
+        setError(msg);
       } finally {
         setLoading(false);
       }
     }
     fetchPredictions();
-  }, []);
+  }, [retryCount]);
 
   return (
     <div className="fade-up" style={{ padding: '2rem 2.5rem', maxWidth: '1000px', margin: '0 auto' }}>
@@ -49,12 +56,21 @@ export default function AnalyticsPage() {
       </div>
 
       {error ? (
-        <div style={{ padding: '1.5rem', background: 'rgba(239,68,68,0.1)', color: '#EF4444', borderRadius: 'var(--radius-card)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', gap: '0.75rem' }}>
-          <AlertCircle size={20} style={{ flexShrink: 0 }} />
-          <div>
-            <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Analytics Error</div>
-            <div style={{ fontSize: '0.85rem' }}>{error}</div>
+        <div style={{ padding: '2rem', background: 'rgba(239,68,68,0.08)', color: '#EF4444', borderRadius: 'var(--radius-card)', border: '1px solid rgba(239,68,68,0.2)' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', marginBottom: '1rem' }}>
+            <AlertCircle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Analytics Error</div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>{error}</div>
+            </div>
           </div>
+          <button
+            onClick={() => setRetryCount(c => c + 1)}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
+          >
+            ↺ Try Again
+          </button>
         </div>
       ) : loading ? (
         <div className="card" style={{ padding: '4rem', textAlign: 'center' }}>
