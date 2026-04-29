@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Users, FileText, AlertTriangle, CheckCircle } from 'lucide-react';
-import StatCard from '@/components/StatCard';
-import ReportsTable from '@/components/ReportsTable';
+import { motion } from 'framer-motion';
+import { 
+  Users, FileText, AlertTriangle, CheckCircle, 
+  ArrowUpRight, Clock, MapPin, Sparkles 
+} from 'lucide-react';
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<any>(null);
-  const [reports, setReports] = useState([]);
+  const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -21,7 +23,7 @@ export default function DashboardPage() {
         ]);
         
         setSummary(summaryRes.data.summary);
-        setReports(reportsRes.data.reports.slice(0, 5)); // Show latest 5
+        setReports(reportsRes.data.reports.slice(0, 6)); 
       } catch (err: any) {
         setError(err.message || 'Failed to load dashboard data');
       } finally {
@@ -31,68 +33,224 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  };
+
+  if (error) {
+    return (
+      <div className="mt-6">
+        <div className="p-4 rounded-md bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+          <AlertTriangle size={20} />
+          <span className="font-medium text-sm">{error}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fade-up" style={{ padding: '2rem 2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 0.5rem' }}>
+    <div>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           Mission Control
         </h1>
-        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
-          Real-time overview of NGO field operations and volunteer readiness.
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 flex items-center gap-2">
+          <Sparkles size={14} className="text-zinc-400" />
+          <span>Real-time overview of NGO field operations.</span>
         </p>
       </div>
 
-      {error ? (
-        <div style={{ padding: '1.25rem', background: 'rgba(239,68,68,0.1)', color: '#EF4444', borderRadius: 'var(--radius-card)', border: '1px solid rgba(239,68,68,0.2)' }}>
-          {error}
+      {/* KPI Cards Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-32 skeleton rounded-md" />
+          ))}
         </div>
       ) : (
-        <>
-          {/* KPI Stat Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
-            <StatCard
-              title="Active Incidents"
-              value={loading ? '-' : summary?.total_reports || 0}
-              icon={AlertTriangle}
-              color="#F59E0B"
-              index={0}
-            />
-            <StatCard
-              title="Available Volunteers"
-              value={loading ? '-' : summary?.available_volunteers || 0}
-              icon={Users}
-              color="#3B82F6"
-              index={1}
-            />
-            <StatCard
-              title="Pending Review"
-              value={loading ? '-' : summary?.by_status?.pending_review || 0}
-              icon={FileText}
-              color="#8B5CF6"
-              index={2}
-            />
-            <StatCard
-              title="Resolved Crises"
-              value={loading ? '-' : summary?.by_status?.resolved || 0}
-              icon={CheckCircle}
-              color="#10B981"
-              index={3}
-            />
-          </div>
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"
+        >
+          {/* Bento Grid — 1: Urgent Incidents */}
+          <motion.div 
+            variants={itemVariants}
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400 flex items-center gap-2">
+                Urgent Incidents
+              </span>
+              <AlertTriangle size={18} className="text-red-500" />
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                {summary?.total_reports || 0}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Immediate triage requested.
+              </p>
+            </div>
+          </motion.div>
 
-          {/* Recent Reports Section */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-              Recent Field Reports
-            </h2>
-            <a href="/reports" className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
-              View All
-            </a>
-          </div>
-          
-          <ReportsTable reports={reports} loading={loading} />
-        </>
+          {/* Bento Grid — 2: Available Volunteers */}
+          <motion.div 
+            variants={itemVariants}
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                Workforce
+              </span>
+              <Users size={18} className="text-zinc-400" />
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                {summary?.available_volunteers || 0}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Ready for assignment.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Bento Grid — 3: Pending Review */}
+          <motion.div 
+            variants={itemVariants}
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                In Review
+              </span>
+              <FileText size={18} className="text-zinc-400" />
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                {summary?.by_status?.pending_review || 0}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Awaiting validation.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Bento Grid — 4: Resolved Crises */}
+          <motion.div 
+            variants={itemVariants}
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                Resolved
+              </span>
+              <CheckCircle size={18} className="text-emerald-500" />
+            </div>
+            <div className="mt-4">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                {summary?.by_status?.resolved || 0}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Successfully processed.
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
+
+      {/* Live Feed Section */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Live Feed
+          </h2>
+          <a 
+            href="/reports" 
+            className="px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 rounded-md text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 transition-colors"
+          >
+            View All 
+            <ArrowUpRight size={14} />
+          </a>
+        </div>
+
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-20 skeleton rounded-md" />
+            ))}
+          </div>
+        ) : reports.length === 0 ? (
+          <div className="text-center py-12 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-md text-zinc-400 text-xs">
+            No intelligence available.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {reports.map((report) => (
+              <motion.div
+                key={report.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer"
+                onClick={() => window.location.href = `/reports/${report.id}`}
+              >
+                <div className="flex items-start gap-3.5 flex-1 min-w-0">
+                  <div className="mt-1 flex-shrink-0">
+                    <span className={`badge text-[10px] ${
+                      report.urgency_level >= 4 ? 'urgency-5' : 
+                      report.urgency_level === 3 ? 'urgency-3' : 'urgency-1'
+                    }`}>
+                      L{report.urgency_level}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
+                      {report.issue_description || 'No description provided'}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-4 mt-2 text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin size={13} />
+                        {report.location_name || 'Unknown'}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock size={13} />
+                        {new Date(report.created_at).toLocaleDateString('en-IN', {
+                          day: '2-digit', month: 'short'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 flex-shrink-0">
+                  <div className="flex flex-wrap gap-1.5">
+                    {(report.required_skills || []).slice(0, 2).map((skill: string) => (
+                      <span key={skill} className="skill-tag">
+                        {skill.replace(/_/g, ' ')}
+                      </span>
+                    ))}
+                  </div>
+                  <span className={`badge text-[10px] status-${report.status}`}>
+                    {report.status.replace(/_/g, ' ')}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -8,11 +8,15 @@ export const metadata: Metadata = {
   keywords: ['NGO', 'volunteer coordination', 'AI matching', 'disaster response', 'Gemini AI'],
 };
 
+import { ThemeProvider } from '@/components/ThemeProvider';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Toaster
           position="bottom-right"
           toastOptions={{

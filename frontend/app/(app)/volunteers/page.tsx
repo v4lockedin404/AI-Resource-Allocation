@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Filter, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Filter, ShieldCheck, Sparkles } from 'lucide-react';
 import VolunteerCard from '@/components/VolunteerCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -35,62 +36,69 @@ export default function VolunteersPage() {
   );
 
   return (
-    <div className="fade-up" style={{ padding: '2rem 2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-      
+    <div>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 0.5rem' }}>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
             Volunteer Fleet
           </h1>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
-            Manage and monitor your specialized on-ground workforce.
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 flex items-center gap-2">
+            <Sparkles size={14} className="text-zinc-400" />
+            <span>Manage on-ground field personnel.</span>
           </p>
         </div>
         
         {/* Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          
-          <div style={{ position: 'relative', width: '240px' }}>
-            <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
               type="text" 
-              className="input" 
-              placeholder="Search name, city, or skill..." 
+              className="w-full h-10 pl-10 pr-4 text-sm rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-700" 
+              placeholder="Search personnel..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: '2.25rem', height: '36px', fontSize: '0.8rem' }}
             />
           </div>
 
+          {/* Filter button */}
           <button 
             onClick={() => setFilterAvailable(!filterAvailable)}
-            className={`btn ${filterAvailable ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ height: '36px', fontSize: '0.8rem' }}
+            className={`h-10 px-4 rounded-md text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer border ${
+              filterAvailable 
+                ? 'bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 border-zinc-900 dark:border-zinc-50' 
+                : 'bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+            }`}
           >
-            <Filter size={14} /> {filterAvailable ? 'Available Only' : 'All Volunteers'}
+            <Filter size={14} /> 
+            <span>{filterAvailable ? 'Available' : 'All Personnel'}</span>
           </button>
-          
         </div>
       </div>
 
       {/* Grid */}
       {loading ? (
-        <div style={{ padding: '4rem', textAlign: 'center' }}><LoadingSpinner /></div>
+        <div className="flex flex-col items-center justify-center py-20">
+          <LoadingSpinner />
+        </div>
       ) : filteredVolunteers.length === 0 ? (
-        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', borderStyle: 'dashed' }}>
-          <ShieldCheck size={32} color="var(--text-muted)" style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 0.5rem' }}>No volunteers found</h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-            Try adjusting your search or filters.
-          </p>
+        <div className="text-center py-20 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-md">
+          <ShieldCheck size={32} className="text-zinc-300 dark:text-zinc-700 mx-auto mb-4" />
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">No personnel found</h3>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-          {filteredVolunteers.map((volunteer, idx) => (
-            <VolunteerCard key={volunteer.id} volunteer={volunteer} index={idx} />
-          ))}
-        </div>
+        <motion.div 
+          layout
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredVolunteers.map((volunteer: any) => (
+              <VolunteerCard key={volunteer.id} volunteer={volunteer} />
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
       
     </div>

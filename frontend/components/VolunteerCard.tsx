@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { MapPin, Clock, Star, CheckCircle, Award } from 'lucide-react';
+import { MapPin, Star, Clock, CheckSquare } from 'lucide-react';
 
 interface Volunteer {
   id: string;
@@ -18,117 +18,88 @@ interface Volunteer {
 
 interface VolunteerCardProps {
   volunteer: Volunteer;
-  index?: number;
 }
 
-const badgeColors: Record<string, string> = {
-  first_responder: '#EF4444',
-  medic_expert:    '#F97316',
-  sanitation_expert: '#10B981',
-  builder:         '#F59E0B',
-  mentor:          '#8B5CF6',
-};
+const softColors = [
+  'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
+  'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300',
+  'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
+  'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
+];
 
-export default function VolunteerCard({ volunteer, index = 0 }: VolunteerCardProps) {
-  const initials = volunteer.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-  const repLevel = volunteer.reputation_points >= 400 ? 'gold' : volunteer.reputation_points >= 200 ? 'silver' : 'bronze';
-  const repColors = { gold: '#F59E0B', silver: '#9CA3AF', bronze: '#CD7C3A' };
+export default function VolunteerCard({ volunteer }: VolunteerCardProps) {
+  const initials = volunteer.name
+    ? volunteer.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'VO';
+
+  const colorIndex = (volunteer.name?.charCodeAt(0) || 0) % softColors.length;
+  const avatarColor = softColors[colorIndex];
 
   return (
     <motion.div
-      className="card"
-      style={{ padding: '1.25rem' }}
-      initial={{ opacity: 0, y: 16 }}
+      layout
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.06 }}
+      exit={{ opacity: 0 }}
+      className="p-5 flex flex-col justify-between min-h-[220px] bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl shadow-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
     >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem', marginBottom: '0.875rem' }}>
-        {/* Avatar */}
-        <div style={{
-          width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0,
-          background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '0.875rem', fontWeight: 700, color: '#fff',
-        }}>
-          {initials}
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-              {volunteer.name}
-            </h3>
-            {/* Availability dot */}
-            <span style={{
-              width: '8px', height: '8px', borderRadius: '50%',
-              background: volunteer.availability ? '#10B981' : '#EF4444',
-              boxShadow: volunteer.availability ? '0 0 6px rgba(16,185,129,0.5)' : 'none',
-              display: 'inline-block',
-            }} title={volunteer.availability ? 'Available' : 'Unavailable'} />
+      <div>
+        {/* Header */}
+        <div className="flex items-start gap-3.5 mb-4">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${avatarColor}`}>
+            {initials}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.2rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            <MapPin size={11} />
-            {volunteer.city || 'Unknown'}
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[var(--color-text-primary)] truncate">
+                {volunteer.name}
+              </h3>
+              <span 
+                className={`w-2 h-2 rounded-full flex-shrink-0 ${volunteer.availability ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'}`} 
+                title={volunteer.availability ? 'Available' : 'Assigned'}
+              />
+            </div>
+            <div className="flex items-center gap-1 mt-1 text-xs text-[var(--color-text-secondary)]">
+              <MapPin size={12} className="text-[var(--color-text-muted)]" />
+              <span className="truncate">{volunteer.city || 'Unknown'}</span>
+            </div>
           </div>
         </div>
 
-        {/* Reputation */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', justifyContent: 'flex-end', color: repColors[repLevel], fontSize: '0.8rem', fontWeight: 700 }}>
-            <Star size={12} fill={repColors[repLevel]} />
-            {volunteer.reputation_points}
-          </div>
-          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{repLevel}</div>
-        </div>
-      </div>
-
-      {/* Skills */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginBottom: '0.75rem' }}>
-        {(volunteer.skills || []).map(skill => (
-          <span key={skill} className="skill-tag">{skill.replace(/_/g, ' ')}</span>
-        ))}
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: 'flex', gap: '1rem', padding: '0.625rem 0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.5rem', marginBottom: '0.75rem' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>{volunteer.hours_available}h</div>
-          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Available</div>
-        </div>
-        <div style={{ width: '1px', background: 'var(--border)' }} />
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'center' }}>
-            <CheckCircle size={11} color="#10B981" />
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>{volunteer.tasks_completed}</span>
-          </div>
-          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Tasks Done</div>
-        </div>
-        <div style={{ width: '1px', background: 'var(--border)' }} />
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'center' }}>
-            <Award size={11} color="#8B5CF6" />
-            <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.85rem' }}>{volunteer.badges?.length ?? 0}</span>
-          </div>
-          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Badges</div>
-        </div>
-      </div>
-
-      {/* Badges */}
-      {volunteer.badges && volunteer.badges.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-          {volunteer.badges.map(badge => (
-            <span key={badge} style={{
-              padding: '0.15rem 0.55rem', borderRadius: '9999px', fontSize: '0.65rem', fontWeight: 600,
-              background: `${badgeColors[badge] ?? '#8B5CF6'}18`,
-              color: badgeColors[badge] ?? '#8B5CF6',
-              border: `1px solid ${badgeColors[badge] ?? '#8B5CF6'}33`,
-            }}>
-              🏅 {badge.replace(/_/g, ' ')}
+        {/* Skills */}
+        <div className="flex flex-wrap gap-1.5 mb-6">
+          {(volunteer.skills || []).slice(0, 3).map((skill) => (
+            <span 
+              key={skill} 
+              className="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium bg-[var(--color-border-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
+            >
+              {skill.replace(/_/g, ' ')}
             </span>
           ))}
+          {(volunteer.skills || []).length > 3 && (
+            <span className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-[var(--color-border-subtle)] text-[var(--color-text-muted)]">
+              +{(volunteer.skills || []).length - 3}
+            </span>
+          )}
         </div>
-      )}
+      </div>
+
+      {/* Metrics Footer */}
+      <div className="pt-3 border-t border-[var(--color-border-subtle)] flex items-center justify-between text-xs font-medium text-[var(--color-text-secondary)]">
+        <div className="flex items-center gap-1.5" title="Available Hours">
+          <Clock size={14} className="text-[var(--color-text-muted)]" />
+          <span className="text-[var(--color-text-primary)] font-semibold">{volunteer.hours_available || 0}h</span>
+        </div>
+        <div className="flex items-center gap-1.5" title="Tasks Completed">
+          <CheckSquare size={14} className="text-[var(--color-text-muted)]" />
+          <span className="text-[var(--color-text-primary)] font-semibold">{volunteer.tasks_completed || 0} jobs</span>
+        </div>
+        <div className="flex items-center gap-1 text-amber-500 font-bold" title="Reputation Points">
+          <Star size={14} className="fill-amber-500 text-amber-500" />
+          <span>{volunteer.reputation_points || 0}</span>
+        </div>
+      </div>
     </motion.div>
   );
 }

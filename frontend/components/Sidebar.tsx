@@ -2,103 +2,186 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FileText, Users, Upload, BarChart3,
-  Zap, LogOut, Activity
+  Zap, LogOut, Menu, X, Sun, Moon
 } from 'lucide-react';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
+import { useTheme } from '@/components/ThemeProvider';
 
 const navItems = [
-  { href: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard'  },
-  { href: '/ingest',     icon: Upload,           label: 'Ingest Reports' },
-  { href: '/reports',    icon: FileText,          label: 'Reports'    },
-  { href: '/volunteers', icon: Users,             label: 'Volunteers' },
-  { href: '/analytics',  icon: BarChart3,         label: 'Analytics'  },
+  { href: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard'     },
+  { href: '/ingest',     icon: Upload,           label: 'Ingest'        },
+  { href: '/reports',    icon: FileText,          label: 'Reports'       },
+  { href: '/volunteers', icon: Users,             label: 'Volunteers'    },
+  { href: '/analytics',  icon: BarChart3,         label: 'Analytics'     },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
+  const { theme, toggleTheme } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
 
   async function handleLogout() {
     const supabase = getSupabaseClient();
     await supabase.auth.signOut();
     toast.success('Signed out successfully');
     router.push('/login');
+    setIsOpen(false);
   }
 
-  return (
-    <aside
-      style={{
-        width: '240px',
-        minWidth: '240px',
-        background: 'var(--bg-surface)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        position: 'sticky',
-        top: 0,
-        padding: '1.25rem 1rem',
-        gap: '0.25rem',
-      }}
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const drawerVariants = {
+    closed: { x: '-100%', transition: { type: 'tween', duration: 0.2 } },
+    open: { x: 0, transition: { type: 'tween', duration: 0.2 } }
+  };
+
+  const ThemeToggleControl = () => (
+    <button
+      onClick={toggleTheme}
+      className="w-10 h-10 flex items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors cursor-pointer"
+      aria-label="Toggle Theme"
     >
-      {/* Logo */}
-      <div style={{ padding: '0.5rem 0.75rem 1.5rem', borderBottom: '1px solid var(--border)', marginBottom: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '8px',
-            background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Zap size={16} color="#fff" />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>AI Resource</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.2 }}>Allocation</div>
-          </div>
+      {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+    </button>
+  );
+
+  return (
+    <>
+      {/* ── Mobile/Tablet Top Navbar ── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 flex items-center justify-between z-50">
+        <div className="flex items-center gap-3">
+          <Zap size={18} className="text-blue-500 fill-blue-500" />
+          <span className="font-bold text-sm tracking-tight text-[var(--color-text-primary)]">
+            ResQ Core
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <ThemeToggleControl />
+          <button
+            onClick={toggleMenu}
+            className="w-10 h-10 flex items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-primary)] cursor-pointer"
+          >
+            <Menu size={20} />
+          </button>
         </div>
       </div>
 
-      {/* Nav items */}
-      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 0.75rem', marginBottom: '0.5rem' }}>
-          Navigation
-        </div>
-        {navItems.map(({ href, icon: Icon, label }) => {
-          const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`sidebar-link${isActive ? ' active' : ''}`}
+      {/* ── Mobile/Tablet Drawer Navigation ── */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              exit={{ opacity: 0 }}
+              onClick={toggleMenu}
+              className="fixed inset-0 bg-black z-40 md:hidden"
+            />
+
+            <motion.aside
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={drawerVariants}
+              className="fixed top-0 bottom-0 left-0 w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] p-6 flex flex-col z-50 md:hidden overflow-y-auto"
             >
-              <Icon size={16} />
-              {label}
-              {isActive && (
-                <span style={{
-                  marginLeft: 'auto', width: '6px', height: '6px',
-                  borderRadius: '50%', background: 'var(--accent-blue)',
-                  boxShadow: '0 0 6px rgba(59,130,246,0.6)',
-                }} />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <Zap size={18} className="text-blue-500 fill-blue-500" />
+                  <span className="font-bold text-sm text-[var(--color-text-primary)]">
+                    ResQ Core
+                  </span>
+                </div>
+                <button onClick={toggleMenu} className="text-[var(--color-text-muted)] cursor-pointer">
+                  <X size={20} />
+                </button>
+              </div>
 
-      {/* Live indicator + logout */}
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>
-          <Activity size={12} className="pulse-glow" />
-          <span>System Live</span>
+              <nav className="flex-1 flex flex-col gap-1">
+                {navItems.map(({ href, icon: Icon, label }) => {
+                  const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+                  return (
+                    <Link 
+                      key={href} 
+                      href={href} 
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 h-11 rounded-md text-sm transition-colors cursor-pointer ${
+                        isActive 
+                          ? 'bg-zinc-100 dark:bg-zinc-800/80 font-semibold text-[var(--color-text-primary)]' 
+                          : 'text-[var(--color-text-secondary)] hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-[var(--color-text-primary)]'
+                      }`}
+                    >
+                      <Icon size={16} />
+                      <span>{label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="mt-auto pt-6 border-t border-[var(--color-border)] flex items-center justify-between bg-[var(--color-surface)]">
+                <ThemeToggleControl />
+                <button
+                  onClick={handleLogout}
+                  className="w-10 h-10 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+                  title="Sign Out"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Desktop Permanent Sidebar ── */}
+      <aside className="hidden md:flex flex-col w-60 bg-[var(--color-surface)] border-r border-[var(--color-border)] p-6 h-screen sticky top-0">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+            <Zap size={20} className="text-blue-500 fill-blue-500" />
+            <div className="text-base font-bold tracking-tight text-[var(--color-text-primary)]">
+              ResQ Core
+            </div>
+          </div>
+          <ThemeToggleControl />
         </div>
-        <button onClick={handleLogout} className="sidebar-link btn-danger" style={{ border: 'none', background: 'transparent', width: '100%', textAlign: 'left' }}>
-          <LogOut size={16} />
-          Sign Out
-        </button>
-      </div>
-    </aside>
+
+        <nav className="flex-1 flex flex-col gap-1">
+          {navItems.map(({ href, icon: Icon, label }) => {
+            const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+            return (
+              <Link 
+                key={href} 
+                href={href} 
+                className={`flex items-center gap-3 px-3 h-11 rounded-md text-sm transition-colors cursor-pointer ${
+                  isActive 
+                    ? 'bg-zinc-100 dark:bg-zinc-800/80 font-semibold text-[var(--color-text-primary)]' 
+                    : 'text-[var(--color-text-secondary)] hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-[var(--color-text-primary)]'
+                }`}
+              >
+                <Icon size={16} />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-auto pt-6 border-t border-[var(--color-border)] flex items-center justify-end bg-[var(--color-surface)]">
+          <button
+            onClick={handleLogout}
+            className="w-10 h-10 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+            title="Sign Out"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
