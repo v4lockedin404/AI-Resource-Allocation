@@ -61,11 +61,11 @@ export default function DashboardPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--color-text-primary)]">
           Mission Control
         </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 flex items-center gap-2">
-          <Sparkles size={14} className="text-zinc-400" />
+        <p className="text-sm text-[var(--color-text-secondary)] mt-1 flex items-center gap-2">
+          <Sparkles size={14} className="text-[var(--color-text-muted)]" />
           <span>Real-time overview of NGO field operations.</span>
         </p>
       </div>
@@ -87,7 +87,7 @@ export default function DashboardPage() {
           {/* Bento Grid — 1: Urgent Incidents */}
           <motion.div 
             variants={itemVariants}
-            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-primary)]"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400 flex items-center gap-2">
@@ -96,10 +96,10 @@ export default function DashboardPage() {
               <AlertTriangle size={18} className="text-red-500" />
             </div>
             <div className="mt-4">
-              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight">
                 {summary?.total_reports || 0}
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                 Immediate triage requested.
               </p>
             </div>
@@ -108,19 +108,19 @@ export default function DashboardPage() {
           {/* Bento Grid — 2: Available Volunteers */}
           <motion.div 
             variants={itemVariants}
-            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-primary)]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
                 Workforce
               </span>
-              <Users size={18} className="text-zinc-400" />
+              <Users size={18} className="text-[var(--color-text-muted)]" />
             </div>
             <div className="mt-4">
-              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight">
                 {summary?.available_volunteers || 0}
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                 Ready for assignment.
               </p>
             </div>
@@ -129,19 +129,19 @@ export default function DashboardPage() {
           {/* Bento Grid — 3: Pending Review */}
           <motion.div 
             variants={itemVariants}
-            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-primary)]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
                 In Review
               </span>
-              <FileText size={18} className="text-zinc-400" />
+              <FileText size={18} className="text-[var(--color-text-muted)]" />
             </div>
             <div className="mt-4">
-              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight">
                 {summary?.by_status?.pending_review || 0}
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                 Awaiting validation.
               </p>
             </div>
@@ -150,19 +150,19 @@ export default function DashboardPage() {
           {/* Bento Grid — 4: Resolved Crises */}
           <motion.div 
             variants={itemVariants}
-            className="card flex flex-col justify-between min-h-[140px] shadow-sm"
+            className="card flex flex-col justify-between min-h-[140px] shadow-sm bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-primary)]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
                 Resolved
               </span>
               <CheckCircle size={18} className="text-emerald-500" />
             </div>
             <div className="mt-4">
-              <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight">
                 {summary?.by_status?.resolved || 0}
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                 Successfully processed.
               </p>
             </div>
@@ -173,12 +173,12 @@ export default function DashboardPage() {
       {/* Live Feed Section */}
       <div className="mt-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h2 className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">
             Live Feed
           </h2>
           <a 
             href="/reports" 
-            className="px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 rounded-md text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 transition-colors"
+            className="px-3 py-1.5 border border-[var(--color-border)] rounded-md text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900 text-[var(--color-text-secondary)] flex items-center gap-1.5 transition-colors"
           >
             View All 
             <ArrowUpRight size={14} />
@@ -192,7 +192,7 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : reports.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-md text-zinc-400 text-xs">
+          <div className="text-center py-12 border border-dashed border-[var(--color-border)] rounded-md text-[var(--color-text-muted)] text-xs">
             No intelligence available.
           </div>
         ) : (
@@ -203,7 +203,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.2 }}
-                className="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer"
+                className="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer"
                 onClick={() => window.location.href = `/reports/${report.id}`}
               >
                 <div className="flex items-start gap-3.5 flex-1 min-w-0">
@@ -216,16 +216,16 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
+                    <p className="text-sm font-semibold truncate">
                       {report.issue_description || 'No description provided'}
                     </p>
-                    <div className="flex flex-wrap items-center gap-x-4 mt-2 text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 mt-2 text-xs text-[var(--color-text-secondary)] font-medium">
                       <span className="flex items-center gap-1.5">
-                        <MapPin size={13} />
+                        <MapPin size={13} className="text-[var(--color-text-muted)]" />
                         {report.location_name || 'Unknown'}
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <Clock size={13} />
+                        <Clock size={13} className="text-[var(--color-text-muted)]" />
                         {new Date(report.created_at).toLocaleDateString('en-IN', {
                           day: '2-digit', month: 'short'
                         })}

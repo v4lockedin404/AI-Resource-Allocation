@@ -68,19 +68,20 @@ export default function UploadZone({ mode, onFileSelect, selectedFile, onClear }
   }
 
   return (
-    <motion.div
-      {...getRootProps()}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      animate={{
-        scale: isDragActive ? 1.02 : 1,
-        borderColor: isDragActive ? 'rgba(59, 130, 246, 0.65)' : 'rgba(59, 130, 246, 0.28)',
-        backdropFilter: isDragActive ? 'blur(16px)' : 'blur(0px)',
-      }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className={`upload-zone py-8 md:py-12 px-4 md:px-6 text-center flex flex-col items-center justify-center relative cursor-pointer group`}
-    >
+    <div {...getRootProps()} className="cursor-pointer">
       <input {...getInputProps()} />
+      
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        animate={{
+          scale: isDragActive ? 1.02 : 1,
+          borderColor: isDragActive ? 'rgba(59, 130, 246, 0.65)' : 'rgba(59, 130, 246, 0.28)',
+          backdropFilter: isDragActive ? 'blur(16px)' : 'blur(0px)',
+        }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className={`upload-zone py-8 md:py-12 px-4 md:px-6 text-center flex flex-col items-center justify-center relative group`}
+      >
       
       {/* Dashed SVG border animation */}
       <div className="absolute inset-0 rounded-xl pointer-events-none overflow-hidden">
@@ -128,5 +129,6 @@ export default function UploadZone({ mode, onFileSelect, selectedFile, onClear }
         }
       `}</style>
     </motion.div>
+    </div>
   );
 }
